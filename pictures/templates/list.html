@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div>
+        {% for object in uploadfile_list %}
+         <p>
+            {{ object.id }}
+            <img width="100px" heigth="100px" src="{{ object.file.url }}">
+         </p>
+        {% endfor %}
+    </div>
+</body>
+</html>
+
+
