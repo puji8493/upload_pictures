@@ -1,6 +1,6 @@
 from django.urls import reverse_lazy
 from django.shortcuts import render
-from django.views.generic import CreateView,ListView
+from django.views.generic import CreateView,ListView,TemplateView
 from .models import UploadFile
 from .forms import UploadForm
 
@@ -9,7 +9,7 @@ class PictureCreateView(CreateView):
     model = UploadFile
     fields = '__all__'
     template_name = 'index.html'
-    success_url = reverse_lazy('pictures:list')
+    success_url = reverse_lazy('pictures:register')
 
     def get(self,request,*args,**kwargs):
         context = {
@@ -23,8 +23,13 @@ class PictureCreateView(CreateView):
         # 画像をアップロードする処理を書く
         upload_form = UploadForm(request.POST or None, request.FILES or None)
         if upload_form.is_valid() and request.FILES:
-            upload_image = upload_form.save()
-        return render(request,'home.html',context={'id': upload_image.id})
+            upload_form.save()
+            # upload_image = upload_form.save()
+        # return render(request,'register.html',context={'id': upload_image.id})
+        return super().form_valid(upload_form)
+
+class PictureRegisterMessage(TemplateView):
+    template_name = 'register.html'
 
 class PictureList(ListView):
     model = UploadFile
