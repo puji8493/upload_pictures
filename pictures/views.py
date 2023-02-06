@@ -12,15 +12,14 @@ class PictureCreateView(CreateView):
     """[1]forms.py　class UploadForm(forms.ModelForm)を引数にとる"""
     model = UploadFile
     fields = '__all__'
-    template_name = 'index.html'
+    template_name = 'top.html'
 
     def get_context_data(self, **kwargs):
         """
-        from実行前の処理
         fromに表示するタイトル、uploadするフオームクラスを戻り値として返す
+
         :param context["title"] :フォームに表示するタイトル名
                context["upload_form"] :class UploadForm
-               　　　　　　　　　　　　　　　forms.ModelForm
         :return:context タイトルとモデルフォームを格納した辞書型オブジェクト
         """
         context = super().get_context_data(**kwargs)
@@ -33,13 +32,13 @@ class PictureCreateView(CreateView):
     def form_valid(self, upload_form):
         """
         投稿されたファイルのファイル名を取得して file_name 属性に格納する
+
         instance.file_nameは、フォームに入力した文字列＋日付時刻でオーバーライドした
         :param upload_form:　写真をアップロードするフォームクラス
-            　　instance:データベースへ保存する前のモデルインスタンスのリスト
+            　　instance:データベースへ保存する前のモデルインスタンス
                instanceのタイプは、<class 'dl.models.UploadFile'>
         :return:
         """
-
         instance = upload_form.save(commit=False)
         print(instance, "instance")
         # file_nameをフォームで入力した文字列にする時は、以下のコードは実行しない
@@ -55,7 +54,7 @@ class PictureCreateView(CreateView):
         return self.request.path
 
 
-class UpdateView(CreateView):
+class PictureUploadView(CreateView):
     """[2] upload.html formのテンプレートを活用する"""
     model = UploadFile
     fields = '__all__'
@@ -64,19 +63,18 @@ class UpdateView(CreateView):
     def form_valid(self, form):
         """
         投稿されたファイルのファイル名を取得して file_name 属性に格納する
-        instance.file_nameは以下の名前でオーバーライド
-        アップロードした画像ファイル名＋"html formのテンプレートからupload"
+
         :param form:　upload.htmlのテンプレートフォーム
-            　　instance:データベースへ保存する前のモデルインスタンスのリスト
-               instanceのタイプは、<class 'dl.models.UploadFile'>
-        :return:
+            　　 instance:データベースへ保存する前のモデルインスタンス
+                instance.file_name:画像ファイルの拡張子を除いた文字列
+        :return:指定されたURLにリダイレクト
         """
         instance = form.save(commit=False)
         # instance.file_nameをオーバーライドしないと、フォームに入力したファイル名
-        instance.file_name = instance.file.name + "html formのテンプレートからupload"
+        print(instance.file.name)
+        idx = instance.file.name.rfind('.')
+        instance.file_name = instance.file.name[:idx]
         instance.save()
-        # saveすると、instance.file_nameに名前が格納された
-
         messages.success(self.request, 'ファイルをアップロードしました。')
         return super().form_valid(form)
 
@@ -94,7 +92,7 @@ class PictureDeleteView(DeleteView):
     """画像を削除するページ"""
     model = UploadFile
     template_name = 'delete_file.html'
-    success_url = reverse_lazy('pictures:list')
+    success_url = reverse_lazy('pictures:picture_list')
 
     def delete(self, request, *args, **kwargs):
         """

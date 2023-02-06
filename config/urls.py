@@ -3,6 +3,7 @@ from django.conf.urls.static import static # 画像を表示する設定
 from django.contrib import admin
 from django.urls import path, include
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('pictures.urls')),
