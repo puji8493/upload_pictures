@@ -1,0 +1,17 @@
+<div id="messages">
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+</div>
+<div id="form-area">
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">送信</button>
+    </form>
+        <br>
+        <P><a href="{% url 'pictures:list' %}">一覧ページへ</a></P>
+
+</div>

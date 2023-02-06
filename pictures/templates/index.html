@@ -7,9 +7,10 @@
 <body>
     <h1>{{title}}</h1>
     <div>
-        {% if id is not None %}
-        <h2>画像が登録されました</h2>
-        <p>画像のIDは {{id}} です</p>
+        {% if messages %}
+        {% for message in messages %}
+            {{ message.message }}
+        {% endfor %}
         {% endif %}
     </div>
     <div>
@@ -18,6 +19,9 @@
             <p>{{ upload_form.as_p }}</p>
             <p><input type="submit" value="アップロード"></p>
         </form>
+        <br>
+        <P><a href="{% url 'pictures:list' %}">一覧ページへ</a></p>
+        </br>
     </div>
 </body>
 </html>

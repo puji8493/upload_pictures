@@ -1,4 +1,5 @@
 *media
+media/images/
 
 # C extensions
 *.so

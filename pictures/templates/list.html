@@ -6,11 +6,16 @@
 </head>
 <body>
     <div>
+        <P><a href="{% url 'pictures:index' %}">model formクラスの登録ページへ</a></p>
+        <P><a href="{% url 'pictures:update' %}">upload.htmlのフォームの登録ページへ</a></p>
+        <br>
         {% for object in uploadfile_list %}
-         <p>
-            {{ object.id }}
+        <tr>
+            <p>ID：{{ object.id }}
             <img width="100px" heigth="100px" src="{{ object.file.url }}">
-         </p>
+                ファイル名：{{ object.file_name }}
+            <a href="{% url 'pictures:delete' pk=object.id %}">削除</a></p>
+        </tr>
         {% endfor %}
     </div>
 </body>
