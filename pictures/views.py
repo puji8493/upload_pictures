@@ -1,12 +1,11 @@
 from datetime import datetime
 
 from django.contrib import messages
-from django.views.generic import CreateView, ListView, TemplateView, DeleteView
+from django.views.generic import CreateView, ListView, DeleteView
+from django.urls import reverse_lazy
 
 from .forms import UploadForm
 from .models import UploadFile
-
-from django.urls import reverse_lazy
 
 
 class PictureCreateView(CreateView):
@@ -65,7 +64,8 @@ class UpdateView(CreateView):
     def form_valid(self, form):
         """
         投稿されたファイルのファイル名を取得して file_name 属性に格納する
-        instance.file_nameは、アップロードした画像ファイル名にオーバーライド
+        instance.file_nameは以下の名前でオーバーライド
+        アップロードした画像ファイル名＋"html formのテンプレートからupload"
         :param form:　upload.htmlのテンプレートフォーム
             　　instance:データベースへ保存する前のモデルインスタンスのリスト
                instanceのタイプは、<class 'dl.models.UploadFile'>
@@ -82,10 +82,6 @@ class UpdateView(CreateView):
 
     def get_success_url(self):
         return self.request.path
-
-
-class PictureRegisterMessage(TemplateView):
-    template_name = 'register.html'
 
 
 class PictureList(ListView):
