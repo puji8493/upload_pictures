@@ -10,6 +10,7 @@ from .models import UploadFile
 
 class PictureCreateView(CreateView):
     """[1]forms.py　class UploadForm(forms.ModelForm)を引数にとる"""
+
     model = UploadFile
     fields = '__all__'
     template_name = 'top.html'
@@ -22,6 +23,7 @@ class PictureCreateView(CreateView):
                context["upload_form"] :class UploadForm
         :return:context タイトルとモデルフォームを格納した辞書型オブジェクト
         """
+
         context = super().get_context_data(**kwargs)
         context = {
             'title': "☆画像のアップロード☆",
@@ -39,6 +41,7 @@ class PictureCreateView(CreateView):
                instanceのタイプは、<class 'dl.models.UploadFile'>
         :return:
         """
+
         instance = upload_form.save(commit=False)
         print(instance, "instance")
         # file_nameをフォームで入力した文字列にする時は、以下のコードは実行しない
@@ -56,6 +59,7 @@ class PictureCreateView(CreateView):
 
 class PictureUploadView(CreateView):
     """[2] upload.html formのテンプレートを活用する"""
+
     model = UploadFile
     fields = '__all__'
     template_name = 'upload.html'
@@ -69,6 +73,7 @@ class PictureUploadView(CreateView):
                 instance.file_name:画像ファイルの拡張子を除いた文字列
         :return:指定されたURLにリダイレクト
         """
+
         instance = form.save(commit=False)
         # instance.file_nameをオーバーライドしないと、フォームに入力したファイル名
         print(instance.file.name)
@@ -84,12 +89,14 @@ class PictureUploadView(CreateView):
 
 class PictureList(ListView):
     """画像のid、写真，削除リンクを表示する一覧ページ"""
+
     model = UploadFile
     template_name = 'list.html'
 
 
 class PictureDeleteView(DeleteView):
     """画像を削除するページ"""
+
     model = UploadFile
     template_name = 'delete_file.html'
     success_url = reverse_lazy('pictures:picture_list')
@@ -98,6 +105,7 @@ class PictureDeleteView(DeleteView):
         """
         pkを指定しないと削除ができなかったので、self.get_objectの引数にpkを渡した
         """
+
         self.object = self.get_object(pk=pk)
         self.object.delete(pk=pk)
         return reverse_lazy(success_url)

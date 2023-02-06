@@ -1,6 +1,8 @@
 from django.db import models
 
 class UploadFile(models.Model):
+    """ファイルとファイルネームのモデル"""
+
     file = models.ImageField(upload_to='media/images/')
     file_name = models.CharField(max_length=100, verbose_name='ダウンロード時に使うファイル名')
 
