@@ -13,7 +13,7 @@
         <tr>
             <p>ID：{{ object.id }}
             <img width="100px" heigth="100px" src="{{ object.file.url }}">
-                ファイル名：{{ object.file_name }}
+                file_name：{{ object.file_name }}
             <a href="{% url 'pictures:delete' pk=object.id %}">削除</a></p>
         </tr>
         {% endfor %}
