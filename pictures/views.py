@@ -96,9 +96,8 @@ class PictureDeleteView(DeleteView):
 
     def delete(self, request, *args, **kwargs):
         """
-        Pkを指定しないと削除ができなかったので、self.get_objectの引数にpkを渡した
+        pkを指定しないと削除ができなかったので、self.get_objectの引数にpkを渡した
         """
         self.object = self.get_object(pk=pk)
-        success_url = self.get_success_url()
         self.object.delete(pk=pk)
         return reverse_lazy(success_url)
