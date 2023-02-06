@@ -7,7 +7,7 @@
 <body>
     <div>
         <P><a href="{% url 'pictures:top' %}">model formクラスの登録ページへ</a>　file_name：file_name+yyyymmdd</p>
-        <P><a href="{% url 'pictures:picture_upload' %}">upload.htmlのフォームの登録ページへ</a>　file_name：アップロードするファイル名+formのテンプレートからupload</p>
+        <P><a href="{% url 'pictures:picture_upload' %}">upload.htmlのフォームの登録ページへ</a>　file_name：画像ファイル名（拡張子は取る）</p>
         <br>
         {% for object in uploadfile_list %}
         <tr>
