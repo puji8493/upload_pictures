@@ -39,7 +39,7 @@ class PictureCreateView(CreateView):
         :param upload_form:　写真をアップロードするフォームクラス
             　　instance:データベースへ保存する前のモデルインスタンス
                instanceのタイプは、<class 'dl.models.UploadFile'>
-        :return:
+        :return:指定されたURLにリダイレクト
         """
 
         instance = upload_form.save(commit=False)
@@ -100,11 +100,11 @@ class PictureDeleteView(DeleteView):
     template_name = 'delete_file.html'
     success_url = reverse_lazy('pictures:picture_list')
 
-    def delete(self, request, *args, **kwargs):
-        """
-        pkを指定しないと削除ができなかったので、self.get_objectの引数にpkを渡した
-        """
-
-        self.object = self.get_object(pk=pk)
-        self.object.delete(pk=pk)
-        return reverse_lazy(success_url)
+    # def delete(self, request, *args, **kwargs):
+    #     """
+    #     pkを指定しないと削除ができなかったので、self.get_objectの引数にpkを渡した
+    #     """
+    #
+    #     self.object = self.get_object(pk=pk)
+    #     self.object.delete()#pkの引数は不要だった
+    #     return reverse_lazy(success_url)
