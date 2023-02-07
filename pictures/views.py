@@ -48,7 +48,6 @@ class PictureCreateView(CreateView):
         instance.file_name = f'{instance.file_name}_{datetime.today().strftime("%Y%m%d")}'
         instance.save()
         # saveすると、instanse.file_nameに名前が格納された
-
         messages.success(self.request, f'id:{instance.id} {instance.file_name}のファイルをアップロードしました。')
         print(type(messages), "message")
         return super().form_valid(upload_form)
@@ -58,11 +57,11 @@ class PictureCreateView(CreateView):
 
 
 class PictureUploadView(CreateView):
-    """[2] upload.html formのテンプレートを活用する"""
+    """[2] upload_file.html formのテンプレートを活用する"""
 
     model = UploadFile
     fields = '__all__'
-    template_name = 'upload.html'
+    template_name = 'upload_file.html'
 
     def form_valid(self, form):
         """
@@ -91,7 +90,7 @@ class PictureList(ListView):
     """画像のid、写真，削除リンクを表示する一覧ページ"""
 
     model = UploadFile
-    template_name = 'list.html'
+    template_name = 'list_file.html'
 
 
 class PictureDeleteView(DeleteView):

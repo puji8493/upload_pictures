@@ -6,14 +6,14 @@
 </head>
 <body>
     <div>
-        <P><a href="{% url 'pictures:top' %}">model formクラスの登録ページへ</a>　file_name：file_name+yyyymmdd</p>
+        <P><a href="{% url 'pictures:top' %}">model formクラスの登録ページへ</a>file_name：file_name+yyyymmdd</p>
         <P><a href="{% url 'pictures:picture_upload' %}">upload.htmlのフォームの登録ページへ</a>　file_name：画像ファイル名（拡張子は取る）</p>
         <br>
         {% for object in uploadfile_list %}
         <tr>
             <p>ID：{{ object.id }}
             <img width="100px" heigth="100px" src="{{ object.file.url }}">
-                file_name：{{ object.file_name }}
+            file_name：{{ object.file_name }}
             <a href="{% url 'pictures:picture_delete' pk=object.id %}">削除</a></p>
         </tr>
         {% endfor %}
