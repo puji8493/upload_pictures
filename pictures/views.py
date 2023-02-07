@@ -100,11 +100,3 @@ class PictureDeleteView(DeleteView):
     template_name = 'delete_file.html'
     success_url = reverse_lazy('pictures:picture_list')
 
-    # def delete(self, request, *args, **kwargs):
-    #     """
-    #     pkを指定しないと削除ができなかったので、self.get_objectの引数にpkを渡した
-    #     """
-    #
-    #     self.object = self.get_object(pk=pk)
-    #     self.object.delete()#pkの引数は不要だった
-    #     return reverse_lazy(success_url)

@@ -10,5 +10,6 @@ urlpatterns = [
     path('upload/', PictureUploadView.as_view(), name='picture_upload'),
     path('list/',PictureList.as_view(),name='picture_list'),
     path('delete/<int:pk>/',PictureDeleteView.as_view(),name='picture_delete'),
+
 ]
 
