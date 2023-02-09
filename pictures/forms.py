@@ -12,7 +12,7 @@ class UploadForm(forms.ModelForm):
 
 
 class EditForm(forms.ModelForm):
-    """画像を編集するフォーム"""
+    """画像を編集(差替）するフォーム"""
 
     class Meta:
         model = UploadFile

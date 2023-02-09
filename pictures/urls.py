@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import (PictureCreateView, PictureDeleteView, PictureDetailView,
-                    PictureList, PictureUploadView, PictureUpdateView,) #PictureDownloadView,
+                    PictureList, PictureUploadView, PictureUpdateView,)
 
 app_name = 'pictures'
 
@@ -12,5 +12,4 @@ urlpatterns = [
     path('delete/<int:pk>/', PictureDeleteView.as_view(), name='picture_delete'),
     path('detail/<int:pk>/', PictureDetailView.as_view(), name='picture_detail'),
     path('edit/<int:pk>/', PictureUpdateView.as_view(), name='picture_edit'),
-    # path('download/<int:pk>/', PictureDownloadView.as_view(), name='picture_download'),
 ]
