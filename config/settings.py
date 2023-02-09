@@ -15,7 +15,6 @@ env = environ.Env()
 environ.Env.read_env(str(BASE_DIR/'.env'))
 # env.read_env(Path.joinpath(BASE_DIR,'.env'))
 #
-# SECRET_KEY = "SECRET_KEY=cyw&wio!-b1z0kz*6yea5zdt)qyl&8#(#xcmrkhu+wb=^%0^v4"
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
