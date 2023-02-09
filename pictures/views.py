@@ -1,14 +1,29 @@
 from datetime import datetime
 
 from django.contrib import messages
-from django.views.generic import CreateView, ListView, DeleteView
+from django.contrib.messages.views import SuccessMessageMixin
+from django.views.generic import CreateView, ListView, DeleteView, DetailView, UpdateView
 from django.urls import reverse_lazy
 
-from .forms import UploadForm
+from .forms import UploadForm, EditForm
 from .models import UploadFile
 
 
-class PictureCreateView(CreateView):
+class MyFormValidMixin:
+    """Mixinクラス　新規登録、編集時のファイルの処理を共通化したメソッドを定義"""
+    def my_form_valid(self, form):
+        """投稿されたファイル名を入力したファイル名＋日付にする"""
+
+        print("mixin呼び出されました","●")
+        instance = form.save(commit=False)
+        if instance.file:
+            instance.file_name = f'{instance.file_name}_{datetime.today().strftime("%Y%m%d")}'
+        print(instance.file_name,"instance.file_name",sep=":")
+        instance.save()
+        return super().form_valid(form)
+
+
+class PictureCreateView(MyFormValidMixin, SuccessMessageMixin, CreateView):
     """[1]forms.py　class UploadForm(forms.ModelForm)を引数にとる"""
 
     model = UploadFile
@@ -18,7 +33,6 @@ class PictureCreateView(CreateView):
     def get_context_data(self, **kwargs):
         """
         fromに表示するタイトル、uploadするフオームクラスを戻り値として返す
-
         :param context["title"] :フォームに表示するタイトル名
                context["upload_form"] :class UploadForm
         :return:context タイトルとモデルフォームを格納した辞書型オブジェクト
@@ -31,28 +45,25 @@ class PictureCreateView(CreateView):
         }
         return context
 
-    def form_valid(self, upload_form):
+    def get_success_message(self, cleaned_data):
         """
-        投稿されたファイルのファイル名を取得して file_name 属性に格納する
-
-        instance.file_nameは、フォームに入力した文字列＋日付時刻でオーバーライドした
-        :param upload_form:　写真をアップロードするフォームクラス
-            　　instance:データベースへ保存する前のモデルインスタンス
-               instanceのタイプは、<class 'dl.models.UploadFile'>
-        :return:指定されたURLにリダイレクト
+        更新時のメッセージを表示
+        :param cleaned_data:'file(InMemoryUploadedFile)'と'file_name'の辞書
+        {'file': <InMemoryUploadedFile: IMG_2174.JPG (image/jpeg)>, 'file_name': 'rapping'}
+        :return:カスタマイズした成功時のメッセージ(新規登録）
         """
 
-        instance = upload_form.save(commit=False)
-        print(instance, "instance")
-        # file_nameをフォームで入力した文字列にする時は、以下のコードは実行しない
-        instance.file_name = f'{instance.file_name}_{datetime.today().strftime("%Y%m%d")}'
-        instance.save()
-        # saveすると、instanse.file_nameに名前が格納された
-        messages.success(self.request, f'id:{instance.id} {instance.file_name}のファイルをアップロードしました。')
-        print(type(messages), "message")
-        return super().form_valid(upload_form)
+        print(cleaned_data, "☆cleand_data")
+        return f'ファイルを{cleaned_data.get("file_name")}で新規登録しました☆'
+
+    def form_valid(self, form):
+        """Mixinクラス MyFormValidMixinのform_validを呼び出す"""
+
+        return self.my_form_valid(form)
 
     def get_success_url(self):
+        """成功時にリダイレクトするURL"""
+
         return self.request.path
 
 
@@ -99,4 +110,64 @@ class PictureDeleteView(DeleteView):
     model = UploadFile
     template_name = 'delete_file.html'
     success_url = reverse_lazy('pictures:picture_list')
+
+
+class PictureDetailView(DetailView):
+    """詳細情報を表示するページ"""
+
+    model = UploadFile
+    template_name = 'detail_file.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class PictureUpdateView(MyFormValidMixin, SuccessMessageMixin, UpdateView):
+    """選択した画像を差し替えるページ"""
+
+    model = UploadFile
+    template_name = 'edit_file.html'
+    form_class = EditForm
+    success_message = '更新成功'
+
+    def get_success_url(self):
+        """成功した時は、updateページにリダイレクト
+        kwargsは、単体モデルインスタンスのid
+        """
+
+        print(self.object.id, "☆id", sep=":")
+        return reverse_lazy('pictures:picture_edit', kwargs={'pk': self.object.id})
+
+    def get_success_message(self, cleaned_data):
+        """
+        更新時のメッセージを表示
+        :param cleaned_data:'file(InMemoryUploadedFile)'と'file_name'の辞書
+        {'file': <InMemoryUploadedFile: IMG_2174.JPG (image/jpeg)>, 'file_name': 'rapping'}
+        :return:カスタマイズした成功時のメッセージ（変更成功）
+        """
+
+        return f'id{self.object.id}:ファイル名{cleaned_data.get("file_name")}に変更しました (^^)/'
+
+    def get_context_data(self, **kwargs):
+        """
+        fromに表示するタイトル、uploadするフオームクラスを戻り値として返す
+        :param context["title"] :フォームに表示するタイトル名
+               context["date"] :フォームに表示する現在日時 (動的に変更）
+               context["upload_form"] :class UploadForm
+        :return:context タイトルとモデルフォームを格納した辞書型オブジェクト
+        """
+
+        context = super().get_context_data(**kwargs)
+        edit_form = EditForm()
+        context['title'] = '☆変更ページです☆'
+        context['date'] = f'ただいまの時刻は、{datetime.today().strftime("%Y/%m/%d %H:%M")}です'
+        context['edit_form'] = edit_form
+        print(context,"context☆",sep=":")
+        return context
+
+    def form_valid(self, form):
+        """Mixinクラス MyFormValidMixinのmy_form_validソメッドを呼び出す"""
+
+        return self.my_form_valid(form)
 

@@ -1,0 +1,9 @@
+<div>
+    <p>ID:{{ object.id }}</p>
+    <p>ファイル名:{{ object.file_name }}</p>
+    <p>ファイルパス:{{ object.file.url }}</p>
+    <p><img width="200px" height="200px" src="{{ object.file.url }}"></p>
+    <br>
+    <a href="{% url 'pictures:picture_list' %}">一覧リストへ</a>
+
+</div>

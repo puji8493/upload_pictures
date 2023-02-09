@@ -11,8 +11,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 env = environ.Env()
-environ.Env.read_env(BASE_DIR/'.env')
-
+# environ.Env.read_env(BASE_DIR/'.env')
+environ.Env.read_env(str(BASE_DIR/'.env'))
+# env.read_env(Path.joinpath(BASE_DIR,'.env'))
+#
+# SECRET_KEY = "SECRET_KEY=cyw&wio!-b1z0kz*6yea5zdt)qyl&8#(#xcmrkhu+wb=^%0^v4"
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -24,13 +27,13 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'pictures.apps.PicturesConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'pictures.apps.PicturesConfig',
     'django_cleanup.apps.CleanupConfig', # 追加
 ]
 
