@@ -9,15 +9,13 @@
             {% csrf_token %}
             {{ form.file.label }}：{{ form.file }}
             <br>
-            {% if form.file.errors %}
-                <div style="color: red">  {{ form.file.errors.as_text }}</div>
-            {% endif %}
-            <br>
             {{ form.file_name.label }}:{{ form.file_name }}
 
             {% if form.file_name.errors %}
                 <div style="color: red">  {{ form.file_name.errors.as_text }}</div>
             {% endif %}
+
+{#            <p>{{ form.as_p }}</p>#}
             <p><input type="submit" value="アップロード"></p>
         </form>
         <br>

@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import (PictureCreateView, PictureDeleteView, PictureDetailView,
-                    PictureList, PictureUploadView, PictureUpdateView,CheckValidationView)
+                    PictureList, PictureUploadView, PictureUpdateView,CheckValidationView,CheckValidationViewByModelForm)
 
 app_name = 'pictures'
 
@@ -13,4 +13,5 @@ urlpatterns = [
     path('detail/<int:pk>/', PictureDetailView.as_view(), name='picture_detail'),
     path('edit/<int:pk>/', PictureUpdateView.as_view(), name='picture_edit'),
     path('check_clean/', CheckValidationView.as_view(), name='picture_clean'),
+    path('check_clean_model/', CheckValidationViewByModelForm.as_view(), name='picture_clean_model'),
 ]

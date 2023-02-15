@@ -5,7 +5,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView,FormView
 from django.urls import reverse_lazy
 
-from .forms import UploadForm, EditForm,CheckValidationForm
+from .forms import UploadForm, EditForm,CheckValidationForm,CheckValidationModelForm
 from .models import UploadFile
 
 
@@ -170,17 +170,47 @@ class PictureUpdateView(MyFormValidMixin, SuccessMessageMixin, UpdateView):
 
 
 class CheckValidationView(FormView):
-    """フォームのバリデーションを確認するページ"""
+    """FormViewクラスを継承したクラス"""
 
     template_name = 'check_validation.html'
     form_class = CheckValidationForm
     success_url = reverse_lazy('pictures:picture_clean')
 
     def form_valid(self, form):
-        """フォームのバリデーションを確認するページ"""
+        """
+        フォームの送信が成功した時の処理
+
+        :param: file:フォームで登録した画像
+                file_name:フォームで入力したファイル名
+        :return:
+
+        """
+
         file = form.cleaned_data.get("file")
         file_name = form.cleaned_data.get("file_name")
         data = {'file': file, 'file_name': file_name}
         instance = UploadFile(**data)
         instance.save()
         return super().form_valid(form)
+
+class CheckValidationViewByModelForm(CreateView):
+    """
+    モデルフォームを使ってフォームのバリデーションを確認する
+
+
+    """
+    model = UploadFile
+    template_name = 'check_validation_model.html'
+    form_class = CheckValidationModelForm
+    success_url = reverse_lazy('pictures:picture_clean_model')
+
+    def form_valid(self, form):
+        """フォームのバリデーション"""
+        print(f'Viewのform_validメソッド request.POST.get("file_name"):{self.request.POST.get("file_name")}')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        """フォームのバリデーション"""
+        print("Viewのform_invlidメソッドの出力",form.errors,sep="：")
+        return super().form_invalid(form)
+
