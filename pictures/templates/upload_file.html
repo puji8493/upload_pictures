@@ -9,6 +9,9 @@
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
+
+{#        {{ form.as_ul }}#}
+{#        {{ form.as_table }}#}
         <button type="submit">送信</button>
     </form>
     <br>

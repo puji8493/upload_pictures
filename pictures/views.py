@@ -2,10 +2,10 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView,FormView
 from django.urls import reverse_lazy
 
-from .forms import UploadForm, EditForm
+from .forms import UploadForm, EditForm,CheckValidationForm
 from .models import UploadFile
 
 
@@ -75,7 +75,6 @@ class PictureUploadView(CreateView):
     def form_valid(self, form):
         """
         投稿されたファイルのファイル名を取得して file_name 属性に格納する
-
         :param form:　upload.htmlのテンプレートフォーム
             　　 instance:データベースへ保存する前のモデルインスタンス
                 instance.file_name:画像ファイルの拡張子を除いた文字列
@@ -169,3 +168,19 @@ class PictureUpdateView(MyFormValidMixin, SuccessMessageMixin, UpdateView):
 
         return self.my_form_valid(form)
 
+
+class CheckValidationView(FormView):
+    """フォームのバリデーションを確認するページ"""
+
+    template_name = 'check_validation.html'
+    form_class = CheckValidationForm
+    success_url = reverse_lazy('pictures:picture_clean')
+
+    def form_valid(self, form):
+        """フォームのバリデーションを確認するページ"""
+        file = form.cleaned_data.get("file")
+        file_name = form.cleaned_data.get("file_name")
+        data = {'file': file, 'file_name': file_name}
+        instance = UploadFile(**data)
+        instance.save()
+        return super().form_valid(form)
