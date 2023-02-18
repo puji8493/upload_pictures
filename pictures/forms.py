@@ -24,7 +24,7 @@ class EditForm(forms.ModelForm):
 
 
 class CheckValidationForm(forms.Form):
-    """clean処理を用いたフォーム作業"""
+    """clean処理を用いたフォーム作業 CheckValidationView(FormView)で使用"""
 
     file = forms.ImageField(label='登録ファイル')
     file_name = forms.CharField(label='ファイル名')
@@ -80,3 +80,21 @@ class CheckValidationModelForm(forms.ModelForm):
         if 'test' in file_name:
             raise forms.ValidationError(f'{file_name}はだめてす')
         return file_name
+
+
+class EditByFormsForm(forms.Form):
+    """画像を編集(差替）するフォーム"""
+
+    file = forms.ImageField(label='編集ファイル')
+    file_name = forms.CharField(label='編集ファイル名')
+
+    def get_initial(self):
+        instance = UploadFile.objects.get(pk=self.kwargs['pk'])
+        return {"file":instance.file, "file_name":instance.file_name}
+
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        if file and file.size > 500 * 1000:
+            raise forms.ValidationError('ファイルサイズは500KB以下にしてください')
+        return file
+

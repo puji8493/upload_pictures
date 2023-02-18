@@ -21,6 +21,8 @@
             file_name：{{ object.file_name }}
             <a href="{% url 'pictures:picture_delete' pk=object.id %}">削除</a>
             <a href="{% url 'pictures:picture_edit' pk=object.id %}">編集</a>
+            <a href="{% url 'pictures:picture_edit_form' pk=object.id %}">編集 by forms.From</a>
+            <a href="{% url 'pictures:picture_edit_update' pk=object.id %}">編集 by forms.From updateview</a>
             <a href="{% url 'pictures:picture_detail' pk=object.id %}">詳細</a>
         </tr>
         {% endfor %}

@@ -2,10 +2,11 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView,FormView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, FormView, View
 from django.urls import reverse_lazy
+from django.shortcuts import render
 
-from .forms import UploadForm, EditForm,CheckValidationForm,CheckValidationModelForm
+from .forms import UploadForm, EditForm, CheckValidationForm, CheckValidationModelForm, EditByFormsForm
 from .models import UploadFile
 
 
@@ -121,7 +122,7 @@ class PictureDetailView(DetailView):
 
 
 class PictureUpdateView(MyFormValidMixin, SuccessMessageMixin, UpdateView):
-    """選択した画像を差し替える編集ページ"""
+    """選択した画像を差し替える編集ページ (modelform使用）"""
 
     model = UploadFile
     template_name = 'edit_file.html'
@@ -170,7 +171,7 @@ class PictureUpdateView(MyFormValidMixin, SuccessMessageMixin, UpdateView):
 
 
 class CheckValidationView(FormView):
-    """FormViewクラスを継承したクラス"""
+    """form.Formsクラスを継承したクラス"""
 
     template_name = 'check_validation.html'
     form_class = CheckValidationForm
@@ -193,6 +194,7 @@ class CheckValidationView(FormView):
         instance.save()
         return super().form_valid(form)
 
+
 class CheckValidationViewByModelForm(CreateView):
     """
     モデルフォームを使ってフォームのバリデーションを確認する
@@ -211,6 +213,49 @@ class CheckValidationViewByModelForm(CreateView):
 
     def form_invalid(self, form):
         """フォームのバリデーション"""
-        print("Viewのform_invlidメソッドの出力",form.errors,sep="：")
+        print("Viewのform_invlidメソッドの出力", form.errors, sep="：")
         return super().form_invalid(form)
 
+
+class EditView(View):
+
+    def get(self, request, *args, **kwargs):
+        edit_form = EditByFormsForm()
+        return render(request, 'edit_file_3.html', context={'edit_form': edit_form})
+
+    def post(self, request, *args, **kwargs):
+        edit_form = EditByFormsForm(request.POST, request.FILES)
+        if edit_form.is_valid():
+            data = edit_form.cleaned_data
+            print(data['file'], data['file_name'])
+            instance = UploadFile.objects.get(id=self.kwargs['pk'])
+            print(instance,'変更前のinsetanceです')
+            instance.file = data['file']
+            instance.file_name = data['file_name']
+            instance.save()
+            print(instance,'変更後のinsetanceです')
+        return render(request, 'edit_file_3.html', context={'edit_form': edit_form})
+        #reverse razyは'__proxy__' object has no attribute 'get'
+
+class EditViewByForm(FormView):
+    model = UploadFile
+    template_name = 'edit_file_2.html'
+    form_class = EditByFormsForm
+    success_url = reverse_lazy('pictures:picture_list')
+
+    def get_initial(self):
+        """初期値を設定する"""
+        instance = UploadFile.objects.get(id=self.kwargs['pk'])
+        print(instance.file.url, "fileのulr")
+        return {'file': instance.file, 'file_name': instance.file_name, 'file_url': instance.file.url}
+
+    def form_valid(self, form):
+        """フォームのバリデーション"""
+        data = form.cleaned_data
+        print(data['file'], data['file_name'])
+        instance = UploadFile.objects.get(id=self.kwargs['pk'])
+        print(instance)
+        instance.file = data['file']
+        instance.file_name = data['file_name']
+        instance.save()
+        return super().form_valid(form)
