@@ -22,6 +22,10 @@ class EditForm(forms.ModelForm):
         model = UploadFile
         fields = '__all__'
 
+    def is_valid(self):
+        print('modelform_isvarid実行')
+        return super().is_valid()
+
 
 class CheckValidationForm(forms.Form):
     """clean処理を用いたフォーム作業 CheckValidationView(FormView)で使用"""
@@ -41,13 +45,12 @@ class CheckValidationForm(forms.Form):
 
         file = self.cleaned_data.get('file')
 
-        print(self.cleaned_data['file']) # ULCA0005.JPG
-        print(type(self.cleaned_data['file'])) # <class 'django.core.files.uploadedfile.TemporaryUploadedFile'>
+        print(self.cleaned_data['file'])  # ULCA0005.JPG
+        print(type(self.cleaned_data['file']))  # <class 'django.core.files.uploadedfile.TemporaryUploadedFile'>
 
         if file and file.size > 500 * 1000:
             raise forms.ValidationError('ファイルサイズは500KB以下にしてください')
         return file
-
 
     def clean_file_name(self):
         """
@@ -70,6 +73,7 @@ class CheckValidationForm(forms.Form):
 
 
 class CheckValidationModelForm(forms.ModelForm):
+    """clean処理を用いたフォーム作業 ModelForm"""
     class Meta:
         model = UploadFile
         fields = '__all__'
@@ -88,9 +92,13 @@ class EditByFormsForm(forms.Form):
     file = forms.ImageField(label='編集ファイル')
     file_name = forms.CharField(label='編集ファイル名')
 
+    def is_valid(self):
+        print("is_valid()が実行されました")
+        return super().is_valid()
+
     def get_initial(self):
         instance = UploadFile.objects.get(pk=self.kwargs['pk'])
-        return {"file":instance.file, "file_name":instance.file_name}
+        return {"file": instance.file, "file_name": instance.file_name}
 
     def clean_file(self):
         file = self.cleaned_data.get('file')
@@ -98,3 +106,8 @@ class EditByFormsForm(forms.Form):
             raise forms.ValidationError('ファイルサイズは500KB以下にしてください')
         return file
 
+
+class DeleteForm(forms.Form):
+    """画像を削除するフォーム"""
+
+    id = forms.IntegerField(label='削除する画像のID', widget=forms.HiddenInput)

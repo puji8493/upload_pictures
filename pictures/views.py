@@ -6,7 +6,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 from django.urls import reverse_lazy
 from django.shortcuts import render
 
-from .forms import UploadForm, EditForm, CheckValidationForm, CheckValidationModelForm, EditByFormsForm
+from .forms import UploadForm, EditForm, CheckValidationForm, CheckValidationModelForm, EditByFormsForm, DeleteForm
 from .models import UploadFile
 
 
@@ -110,6 +110,27 @@ class PictureDeleteView(DeleteView):
     success_url = reverse_lazy('pictures:picture_list')
 
 
+class PictureDeleteByForm(FormView):
+    """フォームから画像を削除するページ"""
+
+    model = UploadFile
+    template_name = 'delete_file_2.html'
+    form_class = DeleteForm
+    success_url = reverse_lazy('pictures:picture_list')
+
+    def form_valid(self, form):
+        """フォームの入力値を取得して、画像を削除する"""
+
+        id = form.cleaned_data['id']
+        UploadFile.objects.get(id=id).delete()
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = '画像を削除する'
+        return context
+
+
 class PictureDetailView(DetailView):
     """詳細情報を表示するページ"""
 
@@ -122,11 +143,13 @@ class PictureDetailView(DetailView):
 
 
 class PictureUpdateView(MyFormValidMixin, SuccessMessageMixin, UpdateView):
-    """選択した画像を差し替える編集ページ (modelform使用）"""
+    """選択した画像を差し替える編集ページ
+    　　modelform使用たと更新できる。forms.Formは更新できない"""
 
     model = UploadFile
     template_name = 'edit_file.html'
-    form_class = EditForm
+    # form_class = EditForm  # ModelFormだと更新できる
+    form_class = EditByFormsForm # fomrs.Form BaseForm.__init__() got an unexpected keyword argument 'instance'
     success_message = '更新成功'
 
     def get_success_url(self):
@@ -218,7 +241,7 @@ class CheckValidationViewByModelForm(CreateView):
 
 
 class EditView(View):
-
+    """ファイルを編集"""
     def get(self, request, *args, **kwargs):
         edit_form = EditByFormsForm()
         return render(request, 'edit_file_3.html', context={'edit_form': edit_form})
@@ -229,15 +252,18 @@ class EditView(View):
             data = edit_form.cleaned_data
             print(data['file'], data['file_name'])
             instance = UploadFile.objects.get(id=self.kwargs['pk'])
-            print(instance,'変更前のinsetanceです')
+            print(instance, '変更前のinsetanceです')
             instance.file = data['file']
             instance.file_name = data['file_name']
             instance.save()
-            print(instance,'変更後のinsetanceです')
+            print(instance, '変更後のinsetanceです')
         return render(request, 'edit_file_3.html', context={'edit_form': edit_form})
-        #reverse razyは'__proxy__' object has no attribute 'get'
+        # reverse razyは'__proxy__' object has no attribute 'get'
+
 
 class EditViewByForm(FormView):
+    """ファイルを編集するFromViewクラス"""
+
     model = UploadFile
     template_name = 'edit_file_2.html'
     form_class = EditByFormsForm
