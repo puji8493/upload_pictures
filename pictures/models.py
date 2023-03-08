@@ -8,3 +8,12 @@ class UploadFile(models.Model):
 
     def __str__(self):
         return self.file_name
+
+class Comment(models.Model):
+    """コメントモデル"""
+
+    comment = models.TextField(verbose_name='コメント')
+    target = models.ForeignKey(UploadFile, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.comment

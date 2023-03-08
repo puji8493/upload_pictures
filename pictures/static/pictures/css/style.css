@@ -1,3 +1,59 @@
-.file-name{
-    color: hotpink;
+body{
+    width: max-width;
+    background-color: white;
+}
+
+h2{
+    font-size: 2.2em;
+    font-weight: bold;
+    height: 50px;
+    background-color: silver;
+    padding-left: 10px;
+    color: blueviolet;
+    margin-bottom: 30px;
+}
+
+p{
+    font-size: 20px;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+
+.th_id,.td_id{
+    width:50px;
+    border: 1px solid black;
+    text-align: center;
+}
+.th_image,.td_image{
+    max-width: 100%;
+    border: 1px solid black;
+    height:auto;
+}
+.th_file_name,.td_file_name{
+    width:50px;
+    border: 1px solid black;
+    text-align: center;
+}
+.th_delete,.td_delete{
+    width:50px;
+    border: 1px solid black;
+    text-align: center;
+}
+.th_edit_1,.td_edit_1{
+    width:50px;
+    border: 1px solid black;
+    text-align: center;
+}
+.th_edit_2,.td_edit_2{
+    width:50px;
+    border: 1px solid black;
+    text-align: center;
+}
+.th_detail,.td_detail{
+    width:50px;
+    border: 1px solid black;
+    text-align: center;
 }

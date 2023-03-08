@@ -5,5 +5,14 @@
         <p>ファイルパス:{{ object.file.url }}</p>
         <p><img width="100px" height="100px" src="{{ object.file.url }}"></p><br>
         <a href="{% url 'pictures:picture_list' %}">一覧リストへ</a>
+        <a href="{% url 'pictures:comment' pk=object.id %}">コメントページ</a>
     </tr>
+    <tr>
+        <p>☆コメント一覧☆</p>
+        <p>コメント数:{{ uploadfile.comment_set.count }}</p>
+        {% for comment in uploadfile.comment_set.all %}
+        <p>コメント{{ forloop.counter }}: {{ comment }}</p>
+        {% endfor %}
+    </tr>
+
 </div>

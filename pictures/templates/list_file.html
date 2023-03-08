@@ -1,31 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'pictures/css/style.css' %}">
+    <script src="https://kit.fontawesome.com/41f9c2a86b.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div>
+        <p>{% if user.is_authenticated %}
+              ログイン名：{{ request.user }}<br>
+              <a href="{% url 'pictures:logout' %}">ログアウト</a>
+           {% else %}
+                <a href="{% url 'pictures:login' %}">ログイン:</a><br>
+                <a href="{% url 'pictures:signup' %}">Signup:</a><br>
+           {% endif %} </p>
         <P><a href="{% url 'pictures:top' %}">model formクラスの登録ページへ</a>  file_name：file_name+yyyymmdd</p>
         <P><a href="{% url 'pictures:picture_upload' %}">upload.htmlのフォームの登録ページへ</a>  file_name：画像ファイル名（拡張子は取る）</p>
         <P><a href="{% url 'pictures:picture_clean' %}">forms.Formsの登録ページ　cleanメソッドチェック</a>  </p>
         <P><a href="{% url 'pictures:picture_clean_model' %}">forms.ModelFormsの登録ページ　cleanメソッドチェック</a> </p>
-
         <br>
+        <table>
+        <tr>
+            <th class="th_id">ID</th>
+            <th class="th_image">画像</th>
+            <th class="th_file_name">ファイル名</th>
+            <th class="th_delete">削除</th>
+            <th class="th_edit_1">編集(update)</th>
+            <th class="th_edit_2">編集(form)</th>
+            <th class="th_detail">詳細</th>
+        </tr>
+
         {% for object in uploadfile_list %}
         <tr>
-            <p>ID：{{ object.id }}
-            <img width="100px" heigth="100px" src="{{ object.file.url }}">
-
-{#            <img width="100px" heigth="100px" src="{{ object.file.url }}">#}
-            file_name：{{ object.file_name }}
-            <a href="{% url 'pictures:picture_delete' pk=object.id %}">削除</a>
-            <a href="{% url 'pictures:picture_edit' pk=object.id %}">編集</a>
-            <a href="{% url 'pictures:picture_edit_form' pk=object.id %}">編集 by forms.From</a>
-            <a href="{% url 'pictures:picture_edit_update' pk=object.id %}">編集 by forms.From updateview</a>
-            <a href="{% url 'pictures:picture_detail' pk=object.id %}">詳細</a>
+                <td class="td_id"><p>{{ object.id }}</td>
+                <td class="td_image"><img width="100px" heigth="100px" src="{{ object.file.url }}"></td>
+                <td class="td_file_name">{{ object.file_name }}</td>
+                <td class="td_delete"><a href="{% url 'pictures:picture_delete' pk=object.id %}">削除</a></td>
+                <td class="td_edit_1"><a href="{% url 'pictures:picture_edit' pk=object.id %}">編集</a></td>
+                <td class="td_edit_2"><a href="{% url 'pictures:picture_edit_form' pk=object.id %}">編集</a></td>
+                <td class="td_detail"><a href="{% url 'pictures:picture_detail' pk=object.id %}">詳細</a></td>
         </tr>
         {% endfor %}
     </div>
 </body>
 </html>
+{% endblock %}

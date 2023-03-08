@@ -2,12 +2,17 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.http import HttpResponseRedirect
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, FormView, View
+from django.views.generic.edit import ModelFormMixin
 from django.urls import reverse_lazy
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404,redirect
 
-from .forms import UploadForm, EditForm, CheckValidationForm, CheckValidationModelForm, EditByFormsForm, DeleteForm
-from .models import UploadFile
+from .forms import UploadForm, EditForm, CheckValidationForm, CheckValidationModelForm, EditByFormsForm, DeleteForm,CommentForm,LoginForm
+from accounts.forms import SignupForm
+from .models import UploadFile,Comment
+from django.contrib.auth.views import LoginView,LogoutView
+from django.contrib.auth import login
 
 
 class MyFormValidMixin:
@@ -149,7 +154,7 @@ class PictureUpdateView(MyFormValidMixin, SuccessMessageMixin, UpdateView):
     model = UploadFile
     template_name = 'edit_file.html'
     # form_class = EditForm  # ModelFormだと更新できる
-    form_class = EditByFormsForm # fomrs.Form BaseForm.__init__() got an unexpected keyword argument 'instance'
+    form_class = EditForm # fomrs.Form BaseForm.__init__() got an unexpected keyword argument 'instance'
     success_message = '更新成功'
 
     def get_success_url(self):
@@ -285,3 +290,62 @@ class EditViewByForm(FormView):
         instance.file_name = data['file_name']
         instance.save()
         return super().form_valid(form)
+
+class CommentView(CreateView):
+    """コメントを登録するViewクラス"""
+
+    model = Comment
+    form_class = CommentForm
+    template_name = 'comment_form.html'
+
+    def form_valid(self, form):
+        """フォームのバリデーション"""
+        uploadfile_pk = self.kwargs['pk']
+        uploadfile = get_object_or_404(UploadFile, pk=uploadfile_pk)
+        comment = form.save(commit=False)
+        comment.target = uploadfile
+        comment.save()
+        return redirect('pictures:picture_detail', pk=uploadfile_pk)
+
+        # instance = form.save(commit=False)
+        # # instance.file_nameをオーバーライドしないと、フォームに入力したファイル名
+        # print(instance.file.name)
+        # idx = instance.file.name.rfind('.')
+        # instance.file_name = instance.file.name[:idx]
+        # instance.save()
+        # messages.success(self.request, 'ファイルをアップロードしました。')
+        # return super().form_valid(form)
+
+class Login(LoginView):
+    """ログインページ"""
+
+    template_name = 'login.html'
+    form_class = LoginForm
+
+
+class Logout(LogoutView):
+    """ログアウトページ"""
+
+    template_name = 'logout.html'
+
+
+class SignUp(CreateView):
+    """ユーザー登録ページ"""
+
+    template_name = 'signup.html'
+    form_class = SignupForm
+    success_url = reverse_lazy('pictures:picture_list')
+    def form_valid(self, form):
+        """ユーザー登録"""
+        valid = super().form_valid(form)
+        login(self.request, self.object)
+        return valid
+
+
+    # def form_valid(self, form):
+    #     """ユーザー登録"""
+    #     user = form.save()
+    #     login(self.request, user)
+    #     self.object = user
+    #     messages.info(self.request, 'ユーザー登録が完了しました。')
+    #     return HttpResponseRedirect(self.get_success_url())

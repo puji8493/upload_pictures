@@ -1,7 +1,11 @@
 from django import forms
 from django.core import validators
 
-from .models import UploadFile
+from .models import UploadFile, Comment
+from django.contrib.auth.forms import AuthenticationForm,UserCreationForm
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from accounts.models import CustomUser
 
 
 class UploadForm(forms.ModelForm):
@@ -111,3 +115,43 @@ class DeleteForm(forms.Form):
     """画像を削除するフォーム"""
 
     id = forms.IntegerField(label='削除する画像のID', widget=forms.HiddenInput)
+
+class CommentForm(forms.ModelForm):
+    """コメントを投稿するフォーム"""
+
+    class Meta:
+        model = Comment
+        fields = ('comment',)
+
+
+class LoginForm(AuthenticationForm):
+    """
+    LoginFormの__init__メソッドは、親クラスの__init__メソッドを呼び出し、
+    LoginFormのインスタンスを初期化します。
+    そして、LoginFormの各フィールド（例えば、ユーザー名やパスワード）に対して、
+    CSSのクラス名を追加することで、フォームのスタイリングを変更しています。
+
+    具体的には、self.fields.values()でLoginFormの全てのフィールドにアクセスし、
+    それぞれのフィールドのwidgetのattrs属性に"form-control"というクラス名を追加しています。
+    "form-control"クラスは、Bootstrapなどのフロントエンドライブラリで使用されるクラスで、
+    テキストフィールドやボタンなどの要素をスタイリングするために使われます。
+    このコードを使うことで、ログインフォームがより見やすく、使いやすくなります。
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'
+
+
+# class SignUpForm(UserCreationForm):
+#     """ユーザー登録用フォーム"""
+#
+#     class Meta:
+#         model = User
+#         fields = ('username', 'email', 'password1','password2')
+#
+
+class SignupForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
+        model = CustomUser
+        fields = ('username','email')

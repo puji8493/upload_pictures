@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'pictures.apps.PicturesConfig',
     'django_cleanup.apps.CleanupConfig', # 追加
+    'accounts.apps.AccountsConfig', # accountsを追加
 ]
 
 MIDDLEWARE = [
@@ -45,6 +46,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 ROOT_URLCONF = 'config.urls'
 
@@ -126,3 +129,6 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# ログイン設定
+LOGIN_URL = 'pictures:login'
+LOGIN_REDIRECT_URL = 'pictures:picture_list'
