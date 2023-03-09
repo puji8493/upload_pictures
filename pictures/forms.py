@@ -142,6 +142,11 @@ class LoginForm(AuthenticationForm):
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-control'
 
+# class SignupForm(UserCreationForm):
+#     class Meta(UserCreationForm.Meta):
+#         model = CustomUser
+#         fields = ('username','email')
+
 
 # class SignUpForm(UserCreationForm):
 #     """ユーザー登録用フォーム"""
@@ -150,8 +155,3 @@ class LoginForm(AuthenticationForm):
 #         model = User
 #         fields = ('username', 'email', 'password1','password2')
 #
-
-class SignupForm(UserCreationForm):
-    class Meta(UserCreationForm.Meta):
-        model = CustomUser
-        fields = ('username','email')

@@ -13,7 +13,7 @@ from accounts.forms import SignupForm
 from .models import UploadFile,Comment
 from django.contrib.auth.views import LoginView,LogoutView
 from django.contrib.auth import login
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 class MyFormValidMixin:
     """Mixinクラス　新規登録、編集時のファイルの処理を共通化したメソッドを定義"""
@@ -28,7 +28,7 @@ class MyFormValidMixin:
         return super().form_valid(form)
 
 
-class PictureCreateView(MyFormValidMixin, SuccessMessageMixin, CreateView):
+class PictureCreateView(LoginRequiredMixin,MyFormValidMixin, SuccessMessageMixin, CreateView):
     """[1]forms.py　class UploadForm(forms.ModelForm)を引数にとる"""
 
     model = UploadFile
@@ -71,7 +71,7 @@ class PictureCreateView(MyFormValidMixin, SuccessMessageMixin, CreateView):
         return self.request.path
 
 
-class PictureUploadView(CreateView):
+class PictureUploadView(LoginRequiredMixin,CreateView):
     """[2] upload_file.html formのテンプレートを活用する"""
 
     model = UploadFile
@@ -107,7 +107,7 @@ class PictureList(ListView):
     template_name = 'list_file.html'
 
 
-class PictureDeleteView(DeleteView):
+class PictureDeleteView(LoginRequiredMixin,DeleteView):
     """画像を削除するページ"""
 
     model = UploadFile
@@ -115,7 +115,7 @@ class PictureDeleteView(DeleteView):
     success_url = reverse_lazy('pictures:picture_list')
 
 
-class PictureDeleteByForm(FormView):
+class PictureDeleteByForm(LoginRequiredMixin,FormView):
     """フォームから画像を削除するページ"""
 
     model = UploadFile
@@ -147,7 +147,7 @@ class PictureDetailView(DetailView):
         return context
 
 
-class PictureUpdateView(MyFormValidMixin, SuccessMessageMixin, UpdateView):
+class PictureUpdateView(LoginRequiredMixin,MyFormValidMixin, SuccessMessageMixin, UpdateView):
     """選択した画像を差し替える編集ページ
     　　modelform使用たと更新できる。forms.Formは更新できない"""
 
@@ -198,7 +198,7 @@ class PictureUpdateView(MyFormValidMixin, SuccessMessageMixin, UpdateView):
         return self.my_form_valid(form)
 
 
-class CheckValidationView(FormView):
+class CheckValidationView(LoginRequiredMixin,FormView):
     """form.Formsクラスを継承したクラス"""
 
     template_name = 'check_validation.html'
@@ -223,7 +223,7 @@ class CheckValidationView(FormView):
         return super().form_valid(form)
 
 
-class CheckValidationViewByModelForm(CreateView):
+class CheckValidationViewByModelForm(LoginRequiredMixin,CreateView):
     """
     モデルフォームを使ってフォームのバリデーションを確認する
 
@@ -245,7 +245,7 @@ class CheckValidationViewByModelForm(CreateView):
         return super().form_invalid(form)
 
 
-class EditView(View):
+class EditView(LoginRequiredMixin,View):
     """ファイルを編集"""
     def get(self, request, *args, **kwargs):
         edit_form = EditByFormsForm()
@@ -266,7 +266,7 @@ class EditView(View):
         # reverse razyは'__proxy__' object has no attribute 'get'
 
 
-class EditViewByForm(FormView):
+class EditViewByForm(LoginRequiredMixin,FormView):
     """ファイルを編集するFromViewクラス"""
 
     model = UploadFile
@@ -291,7 +291,7 @@ class EditViewByForm(FormView):
         instance.save()
         return super().form_valid(form)
 
-class CommentView(CreateView):
+class CommentView(LoginRequiredMixin,CreateView):
     """コメントを登録するViewクラス"""
 
     model = Comment
