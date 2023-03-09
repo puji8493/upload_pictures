@@ -11,7 +11,7 @@
         <p>☆コメント一覧☆</p>
         <p>コメント数:{{ uploadfile.comment_set.count }}</p>
         {% for comment in uploadfile.comment_set.all %}
-        <p>コメント{{ forloop.counter }}: {{ comment }}</p>
+        <p>{{ forloop.counter }}:投稿者：{{ comment.user.username }} コメント:{{ comment }}</p>
         {% endfor %}
     </tr>
 

@@ -124,6 +124,21 @@ class CommentForm(forms.ModelForm):
         fields = ('comment',)
 
 
+# class CommentForm(forms.ModelForm):
+#     """コメントを投稿するフォーム"""
+#     user_id = forms.IntegerField(widget=forms.HiddenInput())
+#
+#     class Meta:
+#         model = Comment
+#         fields = ('comment',)
+#
+#     def save(self, commit=True):
+#         comment = super().save(commit=False)
+#         comment.user_id = self.cleaned_data['user_id']
+#         if commit:
+#             comment.save()
+#         return comment
+
 class LoginForm(AuthenticationForm):
     """
     LoginFormの__init__メソッドは、親クラスの__init__メソッドを呼び出し、

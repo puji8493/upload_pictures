@@ -302,10 +302,24 @@ class CommentView(LoginRequiredMixin,CreateView):
         """フォームのバリデーション"""
         uploadfile_pk = self.kwargs['pk']
         uploadfile = get_object_or_404(UploadFile, pk=uploadfile_pk)
-        comment = form.save(commit=False)
-        comment.target = uploadfile
-        comment.save()
+
+        # comment 変数を初期化するために、 comment = None を追加しています。
+        # また、 if self.request.user.is_authenticated 文を追加し、
+        # ログインしている場合のみ comment 変数に値を設定するようにしました。
+
+        comment = None  # 変数を初期化する
+        if self.request.user.is_authenticated:
+            comment = form.save(commit=False)
+            comment.user = self.request.user
+            comment.target = uploadfile
+            comment.save()
         return redirect('pictures:picture_detail', pk=uploadfile_pk)
+
+        # comment.user_id = self.request.user.id
+        # comment = form.save(commit=False)
+        # comment.target = uploadfile
+        # comment.save()
+        # return redirect('pictures:picture_detail', pk=uploadfile_pk)
 
         # instance = form.save(commit=False)
         # # instance.file_nameをオーバーライドしないと、フォームに入力したファイル名

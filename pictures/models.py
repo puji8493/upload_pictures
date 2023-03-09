@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 class UploadFile(models.Model):
@@ -11,9 +12,10 @@ class UploadFile(models.Model):
 
 class Comment(models.Model):
     """コメントモデル"""
-
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     comment = models.TextField(verbose_name='コメント')
     target = models.ForeignKey(UploadFile, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.comment
+
