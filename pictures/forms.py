@@ -10,21 +10,22 @@ from accounts.models import CustomUser
 
 class UploadForm(forms.ModelForm):
     """画像をアップロードするフォーム"""
+    file_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'file-name'}))
 
     class Meta:
         model = UploadFile
+        fields = ['file', 'file_name']
         # fields = '__all__'
-        fields = ('file', 'file_name')
-
-        file_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'file-name'}))
-
+        # exclude = ['user']
+        # fields = ('file', 'file_name')
 
 class EditForm(forms.ModelForm):
     """画像を編集(差替）するフォーム"""
 
     class Meta:
         model = UploadFile
-        fields = '__all__'
+        fields = ['file', 'file_name']
+        # fields = '__all__'
 
     def is_valid(self):
         print('modelform_isvarid実行')
@@ -80,7 +81,7 @@ class CheckValidationModelForm(forms.ModelForm):
     """clean処理を用いたフォーム作業 ModelForm"""
     class Meta:
         model = UploadFile
-        fields = '__all__'
+        fields = ['file', 'file_name']
 
     def clean_file_name(self):
         file_name = self.cleaned_data['file_name']

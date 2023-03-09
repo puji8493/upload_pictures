@@ -34,6 +34,7 @@
             <th class="th_edit_1">編集(update)</th>
             <th class="th_edit_2">編集(form)</th>
             <th class="th_detail">詳細</th>
+            <th class="th_user">作成者</th>
         </tr>
 
         {% for object in uploadfile_list %}
@@ -45,6 +46,7 @@
                 <td class="td_edit_1"><a href="{% url 'pictures:picture_edit' pk=object.id %}">編集</a></td>
                 <td class="td_edit_2"><a href="{% url 'pictures:picture_edit_form' pk=object.id %}">編集</a></td>
                 <td class="td_detail"><a href="{% url 'pictures:picture_detail' pk=object.id %}">詳細</a></td>
+                <td class="td_user"><p>{{ object.user.username }}</td>
         </tr>
         {% endfor %}
     </div>

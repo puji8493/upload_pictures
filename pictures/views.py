@@ -6,12 +6,13 @@ from django.http import HttpResponseRedirect
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, FormView, View
 from django.views.generic.edit import ModelFormMixin
 from django.urls import reverse_lazy
-from django.shortcuts import render,get_object_or_404,redirect
+from django.shortcuts import render, get_object_or_404, redirect
 
-from .forms import UploadForm, EditForm, CheckValidationForm, CheckValidationModelForm, EditByFormsForm, DeleteForm,CommentForm,LoginForm
+from .forms import UploadForm, EditForm, CheckValidationForm, CheckValidationModelForm, EditByFormsForm, DeleteForm, \
+    CommentForm, LoginForm
 from accounts.forms import SignupForm
-from .models import UploadFile,Comment
-from django.contrib.auth.views import LoginView,LogoutView
+from .models import UploadFile, Comment
+from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -28,11 +29,11 @@ class MyFormValidMixin:
         return super().form_valid(form)
 
 
-class PictureCreateView(LoginRequiredMixin,MyFormValidMixin, SuccessMessageMixin, CreateView):
+class PictureCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     """[1]forms.py　class UploadForm(forms.ModelForm)を引数にとる"""
 
     model = UploadFile
-    fields = '__all__'
+    form_class = UploadForm
     template_name = 'top.html'
 
     def get_context_data(self, **kwargs):
@@ -44,11 +45,25 @@ class PictureCreateView(LoginRequiredMixin,MyFormValidMixin, SuccessMessageMixin
         """
 
         context = super().get_context_data(**kwargs)
-        context = {
+
+        context.update({
             'title': "☆画像のアップロード☆",
             'upload_form': UploadForm(),
-        }
+        })
         return context
+
+    def form_valid(self, form):
+        """
+        投稿されたファイルのファイル名を取得して file_name 属性に格納する
+        :param form:　upload.htmlのテンプレートフォーム
+            　　 instance:データベースへ保存する前のモデルインスタンス
+        :return:指定されたURLにリダイレクト
+        """
+        """フォームのバリデーション"""
+        instance = form.save(commit=False)
+        instance.user_id = self.request.user.id
+        instance.save()
+        return super().form_valid(form)
 
     def get_success_message(self, cleaned_data):
         """
@@ -58,12 +73,8 @@ class PictureCreateView(LoginRequiredMixin,MyFormValidMixin, SuccessMessageMixin
         :return:カスタマイズした成功時のメッセージ(新規登録）
         """
 
-        return f'id:{self.object.id} ファイルを{cleaned_data.get("file_name")}_{datetime.today().strftime("%Y%m%d")}で新規登録しました☆'
+        return f'id:{self.object.id} ファイルを{cleaned_data.get("file_name")}で新規登録しました☆'
 
-    def form_valid(self, form):
-        """Mixinクラス MyFormValidMixinのform_validを呼び出す"""
-
-        return self.my_form_valid(form)
 
     def get_success_url(self):
         """成功時にリダイレクトするURL"""
@@ -71,11 +82,11 @@ class PictureCreateView(LoginRequiredMixin,MyFormValidMixin, SuccessMessageMixin
         return self.request.path
 
 
-class PictureUploadView(LoginRequiredMixin,CreateView):
+class PictureUploadView(LoginRequiredMixin, CreateView):
     """[2] upload_file.html formのテンプレートを活用する"""
 
     model = UploadFile
-    fields = '__all__'
+    form_class = UploadForm
     template_name = 'upload_file.html'
 
     def form_valid(self, form):
@@ -83,15 +94,11 @@ class PictureUploadView(LoginRequiredMixin,CreateView):
         投稿されたファイルのファイル名を取得して file_name 属性に格納する
         :param form:　upload.htmlのテンプレートフォーム
             　　 instance:データベースへ保存する前のモデルインスタンス
-                instance.file_name:画像ファイルの拡張子を除いた文字列
         :return:指定されたURLにリダイレクト
         """
-
+        """フォームのバリデーション"""
         instance = form.save(commit=False)
-        # instance.file_nameをオーバーライドしないと、フォームに入力したファイル名
-        print(instance.file.name)
-        idx = instance.file.name.rfind('.')
-        instance.file_name = instance.file.name[:idx]
+        instance.user_id = self.request.user.id
         instance.save()
         messages.success(self.request, 'ファイルをアップロードしました。')
         return super().form_valid(form)
@@ -107,7 +114,7 @@ class PictureList(ListView):
     template_name = 'list_file.html'
 
 
-class PictureDeleteView(LoginRequiredMixin,DeleteView):
+class PictureDeleteView(LoginRequiredMixin, DeleteView):
     """画像を削除するページ"""
 
     model = UploadFile
@@ -115,7 +122,7 @@ class PictureDeleteView(LoginRequiredMixin,DeleteView):
     success_url = reverse_lazy('pictures:picture_list')
 
 
-class PictureDeleteByForm(LoginRequiredMixin,FormView):
+class PictureDeleteByForm(LoginRequiredMixin, FormView):
     """フォームから画像を削除するページ"""
 
     model = UploadFile
@@ -144,17 +151,19 @@ class PictureDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # ログインしているユーザーの名前を取得して、コンテキストに渡す
         return context
 
 
-class PictureUpdateView(LoginRequiredMixin,MyFormValidMixin, SuccessMessageMixin, UpdateView):
+class PictureUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+# class PictureUpdateView(LoginRequiredMixin, MyFormValidMixin, SuccessMessageMixin, UpdateView):
     """選択した画像を差し替える編集ページ
     　　modelform使用たと更新できる。forms.Formは更新できない"""
 
     model = UploadFile
     template_name = 'edit_file.html'
     # form_class = EditForm  # ModelFormだと更新できる
-    form_class = EditForm # fomrs.Form BaseForm.__init__() got an unexpected keyword argument 'instance'
+    form_class = EditForm  # fomrs.Form BaseForm.__init__() got an unexpected keyword argument 'instance'
     success_message = '更新成功'
 
     def get_success_url(self):
@@ -193,12 +202,25 @@ class PictureUpdateView(LoginRequiredMixin,MyFormValidMixin, SuccessMessageMixin
         return context
 
     def form_valid(self, form):
-        """form_validメソッドだけを定義したMixinクラス(MyFormValidMixin)を呼び出す"""
+        """
+        投稿されたファイルのファイル名を取得して file_name 属性に格納する
+        :param form:　upload.htmlのテンプレートフォーム
+            　　 instance:データベースへ保存する前のモデルインスタンス
+        :return:指定されたURLにリダイレクト
+        """
+        """フォームのバリデーション"""
+        instance = form.save(commit=False)
+        instance.user_id = self.request.user.id
+        instance.save()
+        return super().form_valid(form)
 
-        return self.my_form_valid(form)
+    # def form_valid(self, form):
+    #     """form_validメソッドだけを定義したMixinクラス(MyFormValidMixin)を呼び出す"""
+    #
+    #     return self.my_form_valid(form)
 
 
-class CheckValidationView(LoginRequiredMixin,FormView):
+class CheckValidationView(LoginRequiredMixin, FormView):
     """form.Formsクラスを継承したクラス"""
 
     template_name = 'check_validation.html'
@@ -217,13 +239,14 @@ class CheckValidationView(LoginRequiredMixin,FormView):
 
         file = form.cleaned_data.get("file")
         file_name = form.cleaned_data.get("file_name")
-        data = {'file': file, 'file_name': file_name}
+        user = self.request.user
+        data = {'file': file, 'file_name': file_name, 'user': user}
         instance = UploadFile(**data)
         instance.save()
         return super().form_valid(form)
 
 
-class CheckValidationViewByModelForm(LoginRequiredMixin,CreateView):
+class CheckValidationViewByModelForm(LoginRequiredMixin, CreateView):
     """
     モデルフォームを使ってフォームのバリデーションを確認する
 
@@ -236,7 +259,9 @@ class CheckValidationViewByModelForm(LoginRequiredMixin,CreateView):
 
     def form_valid(self, form):
         """フォームのバリデーション"""
-        print(f'Viewのform_validメソッド request.POST.get("file_name"):{self.request.POST.get("file_name")}')
+        instance = form.save(commit=False)
+        instance.user_id = self.request.user.id
+        instance.save()
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -245,8 +270,9 @@ class CheckValidationViewByModelForm(LoginRequiredMixin,CreateView):
         return super().form_invalid(form)
 
 
-class EditView(LoginRequiredMixin,View):
+class EditView(LoginRequiredMixin, View):
     """ファイルを編集"""
+
     def get(self, request, *args, **kwargs):
         edit_form = EditByFormsForm()
         return render(request, 'edit_file_3.html', context={'edit_form': edit_form})
@@ -266,7 +292,7 @@ class EditView(LoginRequiredMixin,View):
         # reverse razyは'__proxy__' object has no attribute 'get'
 
 
-class EditViewByForm(LoginRequiredMixin,FormView):
+class EditViewByForm(LoginRequiredMixin, FormView):
     """ファイルを編集するFromViewクラス"""
 
     model = UploadFile
@@ -291,7 +317,8 @@ class EditViewByForm(LoginRequiredMixin,FormView):
         instance.save()
         return super().form_valid(form)
 
-class CommentView(LoginRequiredMixin,CreateView):
+
+class CommentView(LoginRequiredMixin, CreateView):
     """コメントを登録するViewクラス"""
 
     model = Comment
@@ -330,6 +357,7 @@ class CommentView(LoginRequiredMixin,CreateView):
         # messages.success(self.request, 'ファイルをアップロードしました。')
         # return super().form_valid(form)
 
+
 class Login(LoginView):
     """ログインページ"""
 
@@ -349,12 +377,12 @@ class SignUp(CreateView):
     template_name = 'signup.html'
     form_class = SignupForm
     success_url = reverse_lazy('pictures:picture_list')
+
     def form_valid(self, form):
         """ユーザー登録"""
         valid = super().form_valid(form)
         login(self.request, self.object)
         return valid
-
 
     # def form_valid(self, form):
     #     """ユーザー登録"""
