@@ -9,12 +9,23 @@ from django.urls import reverse_lazy
 from django.shortcuts import render, get_object_or_404, redirect
 
 from .forms import UploadForm, EditForm, CheckValidationForm, CheckValidationModelForm, EditByFormsForm, DeleteForm, \
-    CommentForm, LoginForm
-from accounts.forms import SignupForm
+    CommentForm
+from accounts.forms import SignupForm, LoginForm
 from .models import UploadFile, Comment
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import login
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
+
+
+class CheckMyPostMixin(UserPassesTestMixin):
+    """Mixinクラス　ログインユーザーの投稿かどうかを判定する"""
+
+    raise_exception = True
+    def test_func(self):
+        """ログインユーザーの投稿かどうかを判定する"""
+
+        post = UploadFile.objects.get(id=self.kwargs['pk'])
+        return post.user == self.request.user
 
 class MyFormValidMixin:
     """Mixinクラス　新規登録、編集時のファイルの処理を共通化したメソッドを定義"""
@@ -114,7 +125,7 @@ class PictureList(ListView):
     template_name = 'list_file.html'
 
 
-class PictureDeleteView(LoginRequiredMixin, DeleteView):
+class PictureDeleteView(CheckMyPostMixin, DeleteView):
     """画像を削除するページ"""
 
     model = UploadFile
@@ -122,7 +133,7 @@ class PictureDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('pictures:picture_list')
 
 
-class PictureDeleteByForm(LoginRequiredMixin, FormView):
+class PictureDeleteByForm(CheckMyPostMixin, FormView):
     """フォームから画像を削除するページ"""
 
     model = UploadFile
@@ -155,15 +166,13 @@ class PictureDetailView(DetailView):
         return context
 
 
-class PictureUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
-# class PictureUpdateView(LoginRequiredMixin, MyFormValidMixin, SuccessMessageMixin, UpdateView):
+class PictureUpdateView(CheckMyPostMixin, SuccessMessageMixin, UpdateView):
     """選択した画像を差し替える編集ページ
     　　modelform使用たと更新できる。forms.Formは更新できない"""
 
     model = UploadFile
     template_name = 'edit_file.html'
-    # form_class = EditForm  # ModelFormだと更新できる
-    form_class = EditForm  # fomrs.Form BaseForm.__init__() got an unexpected keyword argument 'instance'
+    form_class = EditForm
     success_message = '更新成功'
 
     def get_success_url(self):
@@ -270,7 +279,7 @@ class CheckValidationViewByModelForm(LoginRequiredMixin, CreateView):
         return super().form_invalid(form)
 
 
-class EditView(LoginRequiredMixin, View):
+class EditView(CheckMyPostMixin, View):
     """ファイルを編集"""
 
     def get(self, request, *args, **kwargs):
@@ -292,7 +301,7 @@ class EditView(LoginRequiredMixin, View):
         # reverse razyは'__proxy__' object has no attribute 'get'
 
 
-class EditViewByForm(LoginRequiredMixin, FormView):
+class EditViewByForm(CheckMyPostMixin, FormView):
     """ファイルを編集するFromViewクラス"""
 
     model = UploadFile
@@ -341,21 +350,6 @@ class CommentView(LoginRequiredMixin, CreateView):
             comment.target = uploadfile
             comment.save()
         return redirect('pictures:picture_detail', pk=uploadfile_pk)
-
-        # comment.user_id = self.request.user.id
-        # comment = form.save(commit=False)
-        # comment.target = uploadfile
-        # comment.save()
-        # return redirect('pictures:picture_detail', pk=uploadfile_pk)
-
-        # instance = form.save(commit=False)
-        # # instance.file_nameをオーバーライドしないと、フォームに入力したファイル名
-        # print(instance.file.name)
-        # idx = instance.file.name.rfind('.')
-        # instance.file_name = instance.file.name[:idx]
-        # instance.save()
-        # messages.success(self.request, 'ファイルをアップロードしました。')
-        # return super().form_valid(form)
 
 
 class Login(LoginView):
